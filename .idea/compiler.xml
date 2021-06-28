@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="consum001" />
+        <module name="consum002" />
+        <module name="consum003" />
+        <module name="consum004" />
+        <module name="product001" />
+        <module name="product001 (1)" />
+        <module name="product002" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="consum001" target="1.8" />
+      <module name="consum002" target="1.8" />
+      <module name="consum003" target="1.8" />
+      <module name="consum004" target="1.8" />
+      <module name="product001" target="1.8" />
+      <module name="product001 (1)" target="1.8" />
+      <module name="product002" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

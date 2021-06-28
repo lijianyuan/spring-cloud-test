@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: consum001
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.40.10:8847,192.168.40.10:8858,192.168.40.10:8849
+        group: wwww
+        heart-beat-interval: 1000
+        heart-beat-timeout: 1000
+        preserved.ip.delete.timeout: 100
+        cluster-name: consum001
+server:
+  port: 9094

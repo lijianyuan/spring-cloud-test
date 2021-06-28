@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/consum001/consum001.iml" filepath="$PROJECT_DIR$/consum001/consum001.iml" />
+      <module fileurl="file://$PROJECT_DIR$/consum002/consum002.iml" filepath="$PROJECT_DIR$/consum002/consum002.iml" />
+      <module fileurl="file://$PROJECT_DIR$/consum003/consum003.iml" filepath="$PROJECT_DIR$/consum003/consum003.iml" />
+      <module fileurl="file://$PROJECT_DIR$/consum004/consum004.iml" filepath="$PROJECT_DIR$/consum004/consum004.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/nacos-ljy-test.iml" filepath="$PROJECT_DIR$/.idea/nacos-ljy-test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/product001/product001.iml" filepath="$PROJECT_DIR$/product001/product001.iml" />
+      <module fileurl="file://$PROJECT_DIR$/uri/product001 (1).iml" filepath="$PROJECT_DIR$/uri/product001 (1).iml" />
+      <module fileurl="file://$PROJECT_DIR$/product002/product002.iml" filepath="$PROJECT_DIR$/product002/product002.iml" />
+    </modules>
+  </component>
+</project>
