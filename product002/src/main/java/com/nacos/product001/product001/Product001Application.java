@@ -46,7 +46,7 @@ public class Product001Application {
         @RequestMapping(value = "/echo/{str}", method = RequestMethod.GET)
         public String echo(@PathVariable String str) {
            // return restTemplate.getForObject("http://consum001/echo/" + str, String.class);
-            return  testFeignClient.echo(str);
+            return  testFeignClient.echo(str+"0002");
         }
     }
 

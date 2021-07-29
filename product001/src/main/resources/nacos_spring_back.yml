@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: product
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.40.111:8847,192.168.40.111:8858,192.168.40.111:8849
+        group: DEFAULT_GROUP
+        heart-beat-interval: 1000
+        heart-beat-timeout: 1000
+        cluster-name: product
+        metadata:
+          ver: 2
+server:
+  port: 8080
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+  ####  hystrix  设置超时时间
+  hystrix:
+    enabled: true
+    command:
+      default:
+        execution:
+          isolation:
+            thread:
+              timeoutInMilliseconds: 1000
+consum001:
+  ribbon:
+    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RandomRule  ##
+
+    ##############  com.nacos.product001.product001.CustomWeightRibbonRule 自定义负载策率  按照权重负载
+    ###################    com.nacos.product001.product001.CustomClusterRibbonRule  自定义负载策率  访问同一个集群

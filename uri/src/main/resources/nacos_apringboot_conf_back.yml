@@ -1,0 +1,163 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      discovery:
+        # nacos  服务地址
+        server-addr: 192.168.40.111:8847,192.168.40.111:8858,192.168.40.111:8849
+        # 组名 同一个租之间可以访问
+        group: DEFAULT_GROUP
+        # nacos客户端向服务端发送心跳的时间间隔，默认5s
+        #
+        #注：客户端向服务端每隔5s向服务端发送心跳请求，进行服务续租，告诉服务端该实例IP健康。若在3次心跳的间隔时间(默认15s)内服务端没有接受到该实例的心跳请求，
+        #则认为该实例不健康，该实例将无法被消费。如果再次经历3次心跳的间隔时间，服务端接受到该实例的请求，那么会立刻将其设置外健康，并可以被消费，若未接受到，
+        #则删除该实例的注册信息。推荐配置为5s，如果有的业务线希望服务下线或者出故障时希望尽快被发现，可以适当减少该值。
+        ##
+        #————————————————
+        heart-beat-interval: 1000
+        ###服务端没有接受到客户端心跳请求就将其设为不健康的时间间隔，默认为15s
+        ###注：推荐值该值为15s即可，如果有的业务线希望服务下线或者出故障时希望尽快被发现，可以适当减少该值
+        heart-beat-timeout: 1000
+        preserved.ip.delete.timeout: 100
+        cluster-name: gateway
+    gateway:
+      discovery:
+        locator:
+          # 是否和服务注册与发现组件结合，设置为 true 后可以直接使用应用名称调用服务
+          enabled: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowCredentials: true
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      #如果启用nacos或者数据库配置请删除以下配置
+      # 路由（routes：路由，它由唯一标识（ID）、目标服务地址（uri）、一组断言（predicates）和一组过滤器组成（filters）。filters 不是必需参数。）
+      routes:
+      #路由标识（id：标识，具有唯一性）   简单尝试
+      - id: echo
+        # 目标服务地址（uri：地址，请求转发后的地址）   lb://服务名
+        #producturi: lb://consum001
+        uri: lb://product
+        # 路由条件（predicates：断言，匹配 HTTP 请求内容）
+        predicates:
+        ## 1、按照时间路由
+        ##- Before=2018-01-20T06:06:06+08:00[Asia/Shanghai]
+        ##- Between=2018-01-20T06:06:06+08:00[Asia/Shanghai], 2019-01-20T06:06:06+08:00[Asia/Shanghai]
+        ##- After=2018-01-20T06:06:06+08:00[Asia/Shanghai]
+        ## 转发地址格式为 uri/consum001
+        ## 2、通过Cookie 匹配规则
+        ##- Cookie=ityouknow, kee.e  ### 示例 curl http://localhost:8080 --cookie "ityouknow=kee.e"
+        ## 3、通过 Header 匹配 支持正则表达式
+        ##- Header=X-Request-Id, \d+ ### 示例 curl http://localhost:8080  -H "X-Request-Id:666666"
+        ## 4、通过 Host 匹配
+        ## - Host=**.ityouknow.com  ### 示例  curl http://localhost:8080  -H "Host: www.ityouknow.com"
+        ## 5、通过请求方式匹配
+        ## 可以通过是 POST、GET、PUT、DELETE 等不同的请求方式来进行路由。
+        ## - Method=GET
+        ## 6、通过请求参数匹配
+        ## - Query=smile  ## 测试 curl localhost:8080?smile=x&id=2
+        ## - Query=keep, pu. 这样子表示 这样只要当请求中包含 keep 属性并且参数值是以 pu 开头的长度为三位的字符串才会进行匹配和路由。
+        ## 测试 curl localhost:8080?keep=pub 如果是 localhost:8080?keep=pubx 就会 404
+        ## - RemoteAddr=192.168.1.1/24  设置请求的远程地址
+        - Path=/echo/**
+        filters:
+        # 使用自定义拦截器工厂  对应的类 AuthorizeGatewayFilterFactory
+        # 关键在下面一句，值为true则开启认证，false则不开启
+        # 这种配置方式和spring cloud gateway内置的GatewayFilterFactory一致
+        - Authorize=true
+        # 熔断器
+        - name: Hystrix
+          args:
+            name: fallbackCmd
+            fallbackUri: forward:/fallbackCmd
+            ## 限流测试
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 100 # 令牌桶的每秒放的数量  redis-rate-limiter.replenishRate是你允许用户每秒执行多少请求，而不丢弃任何请求。这是令牌桶的填充速率。
+            redis-rate-limiter.burstCapacity: 100 # 令牌桶的最大令牌数 redis-rate-limiter.burstCapacity是允许用户在一秒钟内执行的最大请求数。这是令牌桶可以保存的令牌数。将此值设置为零将阻止所有请求。
+            redis-rate-limiter.requestedTokens: 1 # 是每个请求消耗多少个令牌，默认是1.
+            key-resolver: "#{@hostAddrKeyResolver}" #  获取限流 KEY 的 Bean 的名字  spring boot 的bean
+        #路由标识（id：标识，具有唯一性）   简单尝试
+      # 全局熔断降级配置
+      default-filters:
+      - name: Hystrix
+        args:
+          name: default
+          #转发地址
+          fallbackUri: 'forward:/fallback'
+
+# hystrix 隔离，1秒后自动超时
+hystrix:
+  enabled: true
+  shareSecurityContext: true
+  command:
+    default:  # 默认
+      execution:
+        isolation:
+          #strategy: SEMAPHORE  隔离策略，默认是Thread, 可选Thread｜Semaphore 一个线程池  一个信号量
+          strategy: SEMAPHORE
+          semaphore:
+            #最大并发请求数，默认10，该参数当使用ExecutionIsolationStrategy.SEMAPHORE策略时才有效。如果达到最大并发请求数，请求会被拒绝。
+            #理论上选择semaphore size的原则和选择thread size一致，但选用semaphore时每次执行的单元要比较小且执行速度快（ms级别），否则的话应该用thread。
+            #semaphore应该占整个容器（tomcat）的线程池的一小部分。
+            # strategy 得值是Thread是 maxConcurrentRequests 参数不用设置 使用系统的最大线程数
+            ##THREAD 默认
+            ##运行在独立的线程里，并发请求量受线程池数量限制
+            ##SEMAPHORE
+            ##并发请求量受 semaphore设置量大小。
+            ##在设置为SEMAPHORE之后可以设置maxConcurrentRequests的数量了。
+            maxConcurrentRequests: 100
+          thread:
+            timeoutInMilliseconds: 10000
+    fallbackCmd:
+      execution:
+        isolation:
+          ##strategy: SEMAPHORE 信号量
+          strategy: SEMAPHORE
+          semaphore:
+            #最大并发请求数，默认10，该参数当使用ExecutionIsolationStrategy.SEMAPHORE策略时才有效。如果达到最大并发请求数，请求会被拒绝。
+            #理论上选择semaphore size的原则和选择thread size一致，但选用semaphore时每次执行的单元要比较小且执行速度快（ms级别），否则的话应该用thread。
+            #semaphore应该占整个容器（tomcat）的线程池的一小部分。
+            maxConcurrentRequests: 100
+          thread: # 1秒没响应自动熔断 跳转到配置的fallbackUri
+            timeoutInMilliseconds: 1000
+          ###ThreadPool 相关参数
+          ###线程数默认值10适用于大部分情况（有时可以设置得更小），如果需要设置得更大，那有个基本得公式可以follow：
+          ###requests per second at peak when healthy × 99th percentile latency in seconds + some breathing room
+          ###每秒最大支撑的请求数 (99%平均响应时间 + 缓存值)
+          ###比如：每秒能处理1000个请求，99%的请求响应时间是60ms，那么公式是：
+          ###1000 （0.060+0.012）
+
+          ##基本得原则时保持线程池尽可能小，他主要是为了释放压力，防止资源被阻塞。
+          ##当一切都是正常的时候，线程池一般仅会有1到2个线程激活来提供服务
+  threadpool:
+    default:
+      #并发执行的最大线程数，默认10
+      coreSize: 10
+      ##BlockingQueue的最大队列数，当设为－1，会使用SynchronousQueue，值为正时使用LinkedBlcokingQueue。
+      ##该设置只会在初始化时有效，之后不能修改threadpool的queue size，除非reinitialising thread executor。默认－1。
+      maxQueueSize: 10
+      ## 即使maxQueueSize没有达到，达到queueSizeRejectionThreshold该值后，请求也会被拒绝。因为maxQueueSize不能被动态修改，
+      ##这个参数将允许我们动态设置该值。if maxQueueSize == -1，该字段将不起作用
+      queueSizeRejectionThreshold: 10
+      ## 如果corePoolSize和maxPoolSize设成一样（默认实现）该设置无效。
+      ## 如果通过plugin（https://github.com/Netflix/Hystrix/wiki/Plugins）使用自定义实现，该设置才有用，默认1.
+      keepAliveTimeMinutes: 1
+      metrics:
+        rollingStats:
+          ## 线程池统计指标的时间，默认10000
+          timeInMilliseconds: 10000
+          ## 将rolling window划分为n个buckets，默认10
+          numBuckets: 10
+#####################注意的地方#######################
+###官方默认队列阈值只有5个， 如果要调整队列，必须同时修改maxQueueSize和queueSizeRejectionThreshold属性的值，否则都会出现异常！
+
+  ##### Redis 配置项 #####
+  redis:
+    host: 127.0.0.1
+    port: 6379

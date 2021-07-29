@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: consum001
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.40.111:8847,192.168.40.111:8858,192.168.40.111:8849
+        group: DEFAULT_GROUP
+        heart-beat-interval: 1000
+        heart-beat-timeout: 1000
+        preserved.ip.delete.timeout: 100
+        cluster-name: consum001
+        weight: 0.1 ## 权重
+        metadata:
+          ver: 2
+server:
+  port: 9090

@@ -1,4 +1,4 @@
-package com.nacos.uri.uri;
+package com.nacos.uri.uri.controller;
 
 /**
  * @Description: FallbackController

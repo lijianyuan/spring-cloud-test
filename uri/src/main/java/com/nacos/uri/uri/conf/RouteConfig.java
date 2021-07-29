@@ -1,4 +1,4 @@
-package com.nacos.uri.uri;
+package com.nacos.uri.uri.conf;
 
 /**
  * @Description: RouteConfig
@@ -16,10 +16,14 @@ public class RouteConfig {
 
   //  @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
-        return builder.routes()
-                .route("echo", r -> r.path("/echo/**")
-                         .filters(v->v.stripPrefix(1))
-                        .uri("lb://consum001"))
+        return builder.routes().route(r ->
+                r.path("/echo")
+                        //转发路由
+                        .uri("lb://consum001")
+                        //注册自定义过滤器
+                        .filters(new AuthFilter())
+                        //给定id
+                        .id("user-service"))
                 .build();
     }
 }

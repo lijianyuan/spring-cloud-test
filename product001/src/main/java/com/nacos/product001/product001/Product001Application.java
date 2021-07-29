@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.netflix.hystrix.EnableHystrix;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
@@ -16,11 +17,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+/**springboot注解*/
 @SpringBootApplication
+/**nacos 注册注解*/
 @EnableDiscoveryClient
+/** Feign 注解 也可以采用 RestTemplate 方式**/
 @EnableFeignClients
+/**Hystrix 熔断注解 EnableHystrix注解包含了EnableCircuitBreaker*/
 @EnableHystrix
-@EnableCircuitBreaker
+//@EnableCircuitBreaker  Hystrix 熔断注解 EnableCircuitBreaker EnableHystrix 二者选一个就行
+@RefreshScope
 public class Product001Application {
 
     public static void main(String[] args) {
@@ -44,16 +50,16 @@ public class Product001Application {
         @Autowired
         private TestFeignClient testFeignClient;
 
-       /* @RequestMapping(value = "/echo/{str}", method = RequestMethod.GET)
+        @RequestMapping(value = "/echo/{str}", method = RequestMethod.GET)
         public String echo(@PathVariable String str) {
             //return restTemplate.getForObject("http://consum001/echo/" + str, String.class);
             return  testFeignClient.echo(str);
-        }*/
-       /* @RequestMapping(value = "/test0001/{str}", method = RequestMethod.GET)
+        }
+        @RequestMapping(value = "/test0001/{str}", method = RequestMethod.GET)
         public String test0001(@PathVariable String str) {
             //return restTemplate.getForObject("http://consum001/echo/" + str, String.class);
             return  testFeignClient.echo(str);
-        }*/
+        }
 
     }
 

@@ -8,7 +8,7 @@ package com.nacos.product001.product001;
  */
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+
 
 @Component
 public class VodClientImpl implements TestFeignClient {
